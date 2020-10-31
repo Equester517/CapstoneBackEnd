@@ -4,7 +4,6 @@ import numpy as np
 def contour(image):
     # 사진 사이즈 조정
     def Resizing(img):
-        print(img.shape)
         width = 500
         ratio = width / img.shape[1]  # width * 사진 너비 = 비율
         height = int(ratio * img.shape[0])  # 비율 * 사진 높이
@@ -75,7 +74,6 @@ def contour(image):
 
 
     # 이미지 보여주기
-    cv2.imshow('image', img_hand)
     cv2.imwrite('contour.png',img_hand)
 
     # 창 esc 끄기

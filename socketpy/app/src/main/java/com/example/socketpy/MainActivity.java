@@ -23,9 +23,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -36,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     DataOutputStream dos;
     BufferedInputStream bis;
     InputStream dis;
-    Bitmap b;
+    Bitmap b,c;
     int result = 0;
     byte[] w = new byte[1024];
     private Thread checkUpdate = new Thread() {
@@ -45,10 +47,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             try {
                 dis = sock.getInputStream();
                 while (true) {
-                    //데이터 수신 （5)
-                    result = dis.read(w);
-                    if (result <= 0) continue;
-                    System.out.println(result);
+                    result = dis.read();
+                    Log.w("1번사진", String.valueOf(result));
+                    break;
+                }
+                while (true) {
+                    result = dis.read();
+                    Log.w("2번사진", String.valueOf(result));
+                    break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -73,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
                 try {
                     requestPermissions(new String[]{"android.permission.READ_EXTERNAL_STORAGE"}, 1);
-                    connect("221.167.232.253", 8080);
+                    connect("192.168.43.244", 8080);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -84,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void connect(String ip, int port) {
         b = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath() + "/Client/" + "image.jpg");
+        c = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath() + "/Client/" + "image2.jpg");
         try {
             Log.d("TCP", "server connecting");
             sock = new Socket(ip, port);
@@ -100,19 +107,61 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         (new Thread() {
             public void run() {
                 try {
-                    int len;
+                    int len = bitmapToByteArray(b).length;
+                    byte[] bsize = new byte[]{
+                            (byte) ((len >> 24)),
+                            (byte) ((len >> 16)),
+                            (byte) ((len >> 8)),
+                            (byte) ((len)),
+                    };
+                    dos.write(bsize);
                     int size = 65535;
                     byte[] data = new byte[size];
                     try {
                         while ((len = bis.read(data)) != -1) {
                             dos.write(data, 0, len);
                         }
+
                         System.out.println("데이터보내기 끝 직전");
                         dos.flush();
-                        dos.close();
-                        bis.close();
+                        //bis.close();
                         System.out.println("데이터끝");
                         System.out.println("보낸 파일의 사이즈 : " + bitmapToByteArray(b).length);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    int len2 = bitmapToByteArray(c).length;
+                    bis = new BufferedInputStream(new ByteArrayInputStream(bitmapToByteArray(c)));
+                    byte[] bsize = new byte[]{
+                            (byte) ((len2 >> 24)),
+                            (byte) ((len2 >> 16)),
+                            (byte) ((len2 >> 8)),
+                            (byte) ((len2)),
+                    };
+                    dos.write(bsize);
+                    int size2 = 65535;
+                    byte[] data2 = new byte[size2];
+                    try {
+                        while ((len2 = bis.read(data2)) != -1) {
+                            dos.write(data2, 0, len2);
+                        }
+
+                        System.out.println("데이터보내기 끝 직전");
+                        dos.flush();
+                        //bis.close();
+                        System.out.println("데이터끝");
+                        System.out.println("보낸 파일의 사이즈 : " + bitmapToByteArray(c).length);
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

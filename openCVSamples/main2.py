@@ -66,11 +66,14 @@ def contour(image):
 
     img_hand=cv2.fillPoly(mask, [maxctr], color)
 
+
     # 손 외각선 그리기
+
     img_out=cv2.drawContours(img_hand, [maxctr], 0, (0, 0, 255), 3)
 
-    # 이미지 보여주기
-    cv2.imwrite('contour.png',img_hand)
 
+
+    # 이미지 보여주기
+    cv2.imwrite('contour2.png',img_hand)
 
     return img_hand

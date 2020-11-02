@@ -1,12 +1,11 @@
 import socket
-import main2
+import toGreed2
 import cv2
 import numpy
 import compare
-import main
+import toGreed
 import time
-# 이미지 파일 저장경로
-src = "./temp"
+import struct
 
 BUFF_SIZE = 65535
 isCorrect = 12
@@ -34,6 +33,8 @@ def access():
         length = client_socket.recv(4)
         leng = int.from_bytes(length, byteorder='big', signed=False)
         print(leng)
+        if leng==0:
+            client_socket.close()
         img_data = client_socket.recv(1024)
         sum_data.extend(img_data)
         while img_data:
@@ -77,8 +78,8 @@ def access():
     img_file2.write(sum_data2)
     img_file2.close()
     ###################################################################
-    contour_hand = main.contour('image.png')
-    contour_hand2 = main2.contour('image2.png')
+    contour_hand = toGreed.contour('image.png')
+    contour_hand2 = toGreed2.contour('image2.png')
     ###################################################################
     isCorrect = compare.score(contour_hand)
     isCorrect2=compare.score(contour_hand2)
@@ -95,17 +96,26 @@ def access():
     result, imgencode = cv2.imencode('.jpg', frame, encode_param)
     data = numpy.array(imgencode)
     stringData = data.tostring()
-    print(str(len(stringData)).ljust(16))
+    stringTemp=str.encode(str(len(stringData)).ljust(16))
+    intTemp=int(stringTemp)
+    temp=intTemp.to_bytes(3,byteorder='big',signed=False)
+    print(temp.hex())
+    client_socket.send(temp)
     client_socket.send(stringData)
-    time.sleep(3)
+
     frame2 = cv2.imread('contour2.png')
     #추출한 이미지를 String 형태로 변환(인코딩)시키는 과정
     encode_param2=[int(cv2.IMWRITE_JPEG_QUALITY),90]
     result2, imgencode2 = cv2.imencode('.jpg', frame2, encode_param2)
     data2 = numpy.array(imgencode2)
     stringData2 = data2.tostring()
-    print(str(len(stringData2)).ljust(16))
+    stringTemp = str.encode(str(len(stringData2)).ljust(16))
+    intTemp = int(stringTemp)
+    temp = intTemp.to_bytes(3, byteorder='big', signed=False)
+    print(temp.hex())
+    client_socket.send(temp)
     client_socket.send(stringData2)
+    print('전송끝')
 
 while True:
     access()

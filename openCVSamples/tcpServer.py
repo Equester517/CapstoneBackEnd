@@ -59,6 +59,8 @@ def access():
         length = client_socket.recv(4)
         leng = int.from_bytes(length, byteorder='big', signed=False)
         print(leng)
+        if leng==0:
+            client_socket.close()
         img_data = client_socket.recv(1024)
         sum_data2.extend(img_data)
         while img_data:

@@ -36,7 +36,7 @@ def contour(image):
     img_hsv = cv2.fastNlMeansDenoisingColored(img_hsv, None, 10, 10, 7, 21) # 노이즈제거
 
     lower = np.array([0, 50, 80], dtype="uint8") # 최소 범위
-    upper = np.array([120, 255, 255], dtype="uint8") # 최대 범위
+    upper = np.array([50, 255, 255], dtype="uint8") # 최대 범위
 
     img_hand = cv2.inRange(img_hsv, lower, upper) # 범위 내 이미지 추출
 
@@ -74,5 +74,6 @@ def contour(image):
 
     # 이미지 보여주기
     cv2.imwrite('contour2.png',img_hand)
+    cv2.imwrite('hsv2.png',img_hsv)
 
     return img_hand
